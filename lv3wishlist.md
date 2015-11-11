@@ -13,7 +13,10 @@ LV2 core has stablized but occasionally things arise that we wish had been done.
  * better design would be to pass a double pointer to an array of ports something like run(const
  void** inputs, void*)
 
+
 * Preset Banks
  * these should have been built into plugins so that presets are always contained in a bank
  * heirarcy should be plugin>banks>presets
 
+* Port URI
+ * each port should have a URI
