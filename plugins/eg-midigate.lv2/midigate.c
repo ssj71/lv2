@@ -134,9 +134,10 @@ write_output(Midigate* self, uint32_t offset, uint32_t len)
    +offset+ represents the current time within this this cycle, so
    the output from 0 to +offset+ has already been written.
 
-   MIDI events are read in a loop.  In each iteration, the number of active
+   MIDI events are read in a loop.  In each iteration, the output is written up
+   until the current event time, then the number of active
    notes (on note on and note off) or the program (on program change) is
-   updated, then the output is written up until the current event time.  Then
+   updated based on the data of the current event.  Then
    +offset+ is updated and the next event is processed.  After the loop the
    final chunk from the last event to the end of the cycle is emitted.
 
@@ -158,6 +159,8 @@ run(LV2_Handle instance, uint32_t sample_count)
 	uint32_t  offset = 0;
 
 	LV2_ATOM_SEQUENCE_FOREACH(self->control, ev) {
+		write_output(self, offset, ev->time.frames - offset);
+
 		if (ev->body.type == self->uris.midi_MidiEvent) {
 			const uint8_t* const msg = (const uint8_t*)(ev + 1);
 			switch (lv2_midi_message_type(msg)) {
@@ -176,7 +179,6 @@ run(LV2_Handle instance, uint32_t sample_count)
 			}
 		}
 
-		write_output(self, offset, ev->time.frames - offset);
 		offset = (uint32_t)ev->time.frames;
 	}
 
